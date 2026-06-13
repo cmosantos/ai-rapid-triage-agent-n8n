@@ -9,27 +9,20 @@
       },
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.4,
-      "position": [
-        -640,
-        -96
-      ],
-      "id": "b804dee2-4294-4335-8cc4-cbaa4d2964c0",
-      "name": "When chat message received",
-      "webhookId": "d4939c26-ed9c-485d-b7a9-e7700b938e7f"
+      "position": [-640, -96],
+      "id": "chat-trigger-template",
+      "name": "When chat message received"
     },
     {
       "parameters": {
         "options": {
-          "systemMessage": "You are an AI Rapid Triage Agent for IT support operations.\n\nAnalyze the user's support request and return a clean triage report.\n\nImportant formatting rules:\n- Do not return JSON.\n- Do not use markdown tables.\n- Do not use escaped line breaks like \\n.\n- Do not write backslash characters.\n- Use normal readable text.\n- Each field must appear on a separate line.\n- Keep the answer clean and professional.\n\nUse this exact structure:\n\nTicket Title:\nSummary:\nCategory:\nPriority:\nSecurity Risk:\nBusiness Impact:\nRecommended Actions:\nSuggested User Response:\nInternal Technical Note:\nNeeds Human Review:\n\nCategories allowed:\nMicrosoft 365, Exchange Online, Microsoft Teams, Entra ID / Azure AD, Password / MFA, Device / Hardware, Network / VPN, AWS / IAM, Security / Phishing, Access Request, Software / Application, Other.\n\nPriority allowed:\nLow, Medium, High, Critical.\n\nSecurity Risk allowed:\nNone, Low, Medium, High.\n\nNeeds Human Review must be Yes or No.\n\nUse Critical only for major business impact, confirmed security incident, multiple users affected, account compromise, data exposure, or service outage.\nUse High when the user is blocked from working.\nUse Medium for partial impact.\nUse Low for minor questions or non-urgent requests.\n\nWrite in Brazilian Portuguese.\nBe practical and professional."
+          "systemMessage": "You are an AI Rapid Triage Agent for IT support operations. Analyze the user's support request and return a clean triage report. Do not return JSON or markdown tables. Each field must appear on a separate line. Use this exact structure: Ticket Title:, Summary:, Category:, Priority:, Security Risk:, Business Impact:, Recommended Actions:, Suggested User Response:, Internal Technical Note:, Needs Human Review:. Categories allowed: Microsoft 365, Exchange Online, Microsoft Teams, Entra ID / Azure AD, Password / MFA, Device / Hardware, Network / VPN, AWS / IAM, Security / Phishing, Access Request, Software / Application, Other. Priority allowed: Low, Medium, High, Critical. Security Risk allowed: None, Low, Medium, High. Needs Human Review must be Yes or No. Use Critical only for major business impact, confirmed security incident, multiple users affected, account compromise, data exposure, or service outage. Use High when the user is blocked from working. Use Medium for partial impact. Use Low for minor questions or non-urgent requests. Write in Brazilian Portuguese. Be practical and professional."
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 3.1,
-      "position": [
-        -432,
-        -128
-      ],
-      "id": "4c670d48-7ce2-4672-a9d9-754adf425021",
+      "position": [-432, -128],
+      "id": "ai-agent-template",
       "name": "AI Agent"
     },
     {
@@ -48,63 +41,32 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
-      "position": [
-        -576,
-        112
-      ],
-      "id": "bfbed87e-2d6f-4ba6-962f-23352aed6cde",
-      "name": "OpenAI Chat Model",
-      "credentials": {
-        "openAiApi": {
-          "id": "sCnW7c5eGuAs564l",
-          "name": "OpenAI account"
-        }
-      }
+      "position": [-576, 112],
+      "id": "openai-model-template",
+      "name": "OpenAI Chat Model"
     },
     {
       "parameters": {
-        "jsCode": "let raw =\n  $json.output ||\n  $json.text ||\n  $json.response ||\n  $json.message ||\n  '';\n\nif (typeof raw !== 'string') {\n  raw = JSON.stringify(raw, null, 2);\n}\n\nraw = raw.trim();\n\nif (\n  (raw.startsWith('\"') && raw.endsWith('\"')) ||\n  (raw.startsWith(\"'\") && raw.endsWith(\"'\"))\n) {\n  raw = raw.slice(1, -1);\n}\n\nconst cleanOutput = raw\n  .replace(/\\\\n/g, '\\n')\n  .replace(/\\\\r/g, '')\n  .replace(/\\\\t/g, ' ')\n  .replace(/\\\\\"/g, '\"')\n  .replace(/[ \\t]+$/gm, '')\n  .trim();\n\nfunction extractField(text, fieldName, nextFieldName) {\n  const start = text.indexOf(fieldName + ':');\n  if (start === -1) return '';\n\n  const valueStart = start + fieldName.length + 1;\n  let valueEnd = text.length;\n\n  if (nextFieldName) {\n    const nextStart = text.indexOf(nextFieldName + ':', valueStart);\n    if (nextStart !== -1) {\n      valueEnd = nextStart;\n    }\n  }\n\n  return text.slice(valueStart, valueEnd).trim();\n}\n\nconst ticketTitle = extractField(cleanOutput, 'Ticket Title', 'Summary');\nconst summary = extractField(cleanOutput, 'Summary', 'Category');\nconst category = extractField(cleanOutput, 'Category', 'Priority');\nconst priority = extractField(cleanOutput, 'Priority', 'Security Risk');\nconst securityRisk = extractField(cleanOutput, 'Security Risk', 'Business Impact');\nconst businessImpact = extractField(cleanOutput, 'Business Impact', 'Recommended Actions');\nconst recommendedActions = extractField(cleanOutput, 'Recommended Actions', 'Suggested User Response');\nconst suggestedUserResponse = extractField(cleanOutput, 'Suggested User Response', 'Internal Technical Note');\nconst internalTechnicalNote = extractField(cleanOutput, 'Internal Technical Note', 'Needs Human Review');\nconst needsHumanReview = extractField(cleanOutput, 'Needs Human Review', null);\n\nconst now = new Date();\nconst timestamp = now.toISOString();\n\nconst pad = (n) => String(n).padStart(2, '0');\n\nconst ticketId =\n  'TRIAGE-' +\n  now.getUTCFullYear() +\n  pad(now.getUTCMonth() + 1) +\n  pad(now.getUTCDate()) +\n  '-' +\n  pad(now.getUTCHours()) +\n  pad(now.getUTCMinutes()) +\n  pad(now.getUTCSeconds());\n\nfunction getSlaTarget(priorityValue) {\n  const value = String(priorityValue).toLowerCase();\n\n  if (value.includes('critical')) return '1 hour';\n  if (value.includes('high')) return '4 hours';\n  if (value.includes('medium')) return '1 business day';\n  if (value.includes('low')) return '3 business days';\n\n  return 'To be defined';\n}\n\nfunction getAssignedQueue(categoryValue) {\n  const value = String(categoryValue).toLowerCase();\n\n  if (\n    value.includes('microsoft 365') ||\n    value.includes('exchange') ||\n    value.includes('teams')\n  ) {\n    return 'Microsoft 365 Support';\n  }\n\n  if (\n    value.includes('entra') ||\n    value.includes('azure ad') ||\n    value.includes('password') ||\n    value.includes('mfa') ||\n    value.includes('access')\n  ) {\n    return 'Identity & Access Support';\n  }\n\n  if (value.includes('aws') || value.includes('iam')) {\n    return 'Cloud IAM Support';\n  }\n\n  if (value.includes('security') || value.includes('phishing')) {\n    return 'Security Operations';\n  }\n\n  if (value.includes('network') || value.includes('vpn')) {\n    return 'Network Support';\n  }\n\n  if (value.includes('device') || value.includes('hardware')) {\n    return 'Field Support';\n  }\n\n  if (value.includes('software') || value.includes('application')) {\n    return 'Application Support';\n  }\n\n  return 'General IT Support';\n}\n\nfunction shouldEscalate(priorityValue, riskValue, reviewValue) {\n  const priorityText = String(priorityValue).toLowerCase();\n  const riskText = String(riskValue).toLowerCase();\n  const reviewText = String(reviewValue).toLowerCase();\n\n  if (priorityText.includes('critical') || priorityText.includes('high')) {\n    return 'Yes';\n  }\n\n  if (riskText.includes('high') || riskText.includes('medium')) {\n    return 'Yes';\n  }\n\n  if (reviewText.includes('yes')) {\n    return 'Yes';\n  }\n\n  return 'No';\n}\n\nconst slaTarget = getSlaTarget(priority);\nconst assignedQueue = getAssignedQueue(category);\nconst escalationRequired = shouldEscalate(priority, securityRisk, needsHumanReview);\n\nreturn [\n  {\n    json: {\n      timestamp: timestamp,\n      ticket_id: ticketId,\n      ticket_title: ticketTitle,\n      summary: summary,\n      category: category,\n      priority: priority,\n      security_risk: securityRisk,\n      business_impact: businessImpact,\n      recommended_actions: recommendedActions,\n      suggested_user_response: suggestedUserResponse,\n      internal_technical_note: internalTechnicalNote,\n      needs_human_review: needsHumanReview,\n      status: 'New',\n      sla_target: slaTarget,\n      assigned_queue: assignedQueue,\n      escalation_required: escalationRequired,\n      clean_output: cleanOutput,\n      output: cleanOutput\n    }\n  }\n];"
+        "jsCode": "let raw = $json.output || $json.text || $json.response || $json.message || '';\nif (typeof raw !== 'string') raw = JSON.stringify(raw, null, 2);\nraw = raw.trim();\nconst cleanOutput = raw.replace(/\\\\n/g, '\\n').replace(/\\\\r/g, '').replace(/\\\\t/g, ' ').replace(/\\\\\"/g, '\"').trim();\nfunction extractField(text, fieldName, nextFieldName) {\n  const start = text.indexOf(fieldName + ':');\n  if (start === -1) return '';\n  const valueStart = start + fieldName.length + 1;\n  let valueEnd = text.length;\n  if (nextFieldName) {\n    const nextStart = text.indexOf(nextFieldName + ':', valueStart);\n    if (nextStart !== -1) valueEnd = nextStart;\n  }\n  return text.slice(valueStart, valueEnd).trim();\n}\nconst ticketTitle = extractField(cleanOutput, 'Ticket Title', 'Summary');\nconst summary = extractField(cleanOutput, 'Summary', 'Category');\nconst category = extractField(cleanOutput, 'Category', 'Priority');\nconst priority = extractField(cleanOutput, 'Priority', 'Security Risk');\nconst securityRisk = extractField(cleanOutput, 'Security Risk', 'Business Impact');\nconst businessImpact = extractField(cleanOutput, 'Business Impact', 'Recommended Actions');\nconst recommendedActions = extractField(cleanOutput, 'Recommended Actions', 'Suggested User Response');\nconst suggestedUserResponse = extractField(cleanOutput, 'Suggested User Response', 'Internal Technical Note');\nconst internalTechnicalNote = extractField(cleanOutput, 'Internal Technical Note', 'Needs Human Review');\nconst needsHumanReview = extractField(cleanOutput, 'Needs Human Review', null);\nconst now = new Date();\nconst pad = (n) => String(n).padStart(2, '0');\nconst ticketId = 'TRIAGE-' + now.getUTCFullYear() + pad(now.getUTCMonth() + 1) + pad(now.getUTCDate()) + '-' + pad(now.getUTCHours()) + pad(now.getUTCMinutes()) + pad(now.getUTCSeconds());\nfunction getSlaTarget(value) {\n  const p = String(value).toLowerCase();\n  if (p.includes('critical')) return '1 hour';\n  if (p.includes('high')) return '4 hours';\n  if (p.includes('medium')) return '1 business day';\n  if (p.includes('low')) return '3 business days';\n  return 'To be defined';\n}\nfunction getAssignedQueue(value) {\n  const c = String(value).toLowerCase();\n  if (c.includes('microsoft 365') || c.includes('exchange') || c.includes('teams')) return 'Microsoft 365 Support';\n  if (c.includes('entra') || c.includes('azure ad') || c.includes('password') || c.includes('mfa') || c.includes('access')) return 'Identity & Access Support';\n  if (c.includes('aws') || c.includes('iam')) return 'Cloud IAM Support';\n  if (c.includes('security') || c.includes('phishing')) return 'Security Operations';\n  if (c.includes('network') || c.includes('vpn')) return 'Network Support';\n  if (c.includes('device') || c.includes('hardware')) return 'Field Support';\n  if (c.includes('software') || c.includes('application')) return 'Application Support';\n  return 'General IT Support';\n}\nfunction shouldEscalate(priorityValue, riskValue, reviewValue) {\n  const p = String(priorityValue).toLowerCase();\n  const r = String(riskValue).toLowerCase();\n  const h = String(reviewValue).toLowerCase();\n  return p.includes('critical') || p.includes('high') || r.includes('high') || r.includes('medium') || h.includes('yes') ? 'Yes' : 'No';\n}\nreturn [{ json: {\n  timestamp: now.toISOString(),\n  ticket_id: ticketId,\n  ticket_title: ticketTitle,\n  summary, category, priority,\n  security_risk: securityRisk,\n  business_impact: businessImpact,\n  recommended_actions: recommendedActions,\n  suggested_user_response: suggestedUserResponse,\n  internal_technical_note: internalTechnicalNote,\n  needs_human_review: needsHumanReview,\n  status: 'New',\n  sla_target: getSlaTarget(priority),\n  assigned_queue: getAssignedQueue(category),\n  escalation_required: shouldEscalate(priority, securityRisk, needsHumanReview),\n  clean_output: cleanOutput,\n  output: cleanOutput\n}}];"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        -112,
-        -128
-      ],
-      "id": "bdef335e-2c9f-46f5-a20b-8baba6bb4c1b",
+      "position": [-112, -128],
+      "id": "javascript-template",
       "name": "Code in JavaScript"
-    },
-    {
-      "parameters": {
-        "message": "={{ $('Code in JavaScript').first().json.clean_output }}",
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.chat",
-      "typeVersion": 1.3,
-      "position": [
-        640,
-        -128
-      ],
-      "id": "0534a276-e04d-4a08-b6e5-99479e29dfd2",
-      "name": "Chat",
-      "webhookId": "27d2e2a8-d4fe-4dc3-b494-7296351e711f"
     },
     {
       "parameters": {
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1LxxU8O8qeKIr6SQz9f24ij9Ztf0scYIQb1N_ym6Yl64",
-          "mode": "list",
-          "cachedResultName": "AI Rapid Triage Tickets",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LxxU8O8qeKIr6SQz9f24ij9Ztf0scYIQb1N_ym6Yl64/edit?usp=drivesdk"
+          "value": "REPLACE_WITH_GOOGLE_SHEET_ID",
+          "mode": "id"
         },
         "sheetName": {
           "__rl": true,
-          "value": "gid=0",
-          "mode": "list",
-          "cachedResultName": "Página1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1LxxU8O8qeKIr6SQz9f24ij9Ztf0scYIQb1N_ym6Yl64/edit#gid=0"
+          "value": "Tickets",
+          "mode": "name"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -120,163 +82,14 @@
             "suggested_user_response": "={{ $json.suggested_user_response }}",
             "internal_technical_note": "={{ $json.internal_technical_note }}",
             "needs_human_review": "={{ $json.needs_human_review }}",
-            "status": "New",
+            "status": "={{ $json.status }}",
             "ticket_id": "={{ $json.ticket_id }}",
             "sla_target": "={{ $json.sla_target }}",
             "assigned_queue": "={{ $json.assigned_queue }}",
             "escalation_required": "={{ $json.escalation_required }}"
           },
           "matchingColumns": [],
-          "schema": [
-            {
-              "id": "timestamp",
-              "displayName": "timestamp",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "ticket_title",
-              "displayName": "ticket_title",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "summary",
-              "displayName": "summary",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "category",
-              "displayName": "category",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "priority",
-              "displayName": "priority",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "security_risk",
-              "displayName": "security_risk",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "business_impact",
-              "displayName": "business_impact",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "recommended_actions",
-              "displayName": "recommended_actions",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "suggested_user_response",
-              "displayName": "suggested_user_response",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "internal_technical_note",
-              "displayName": "internal_technical_note",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "needs_human_review",
-              "displayName": "needs_human_review",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "status",
-              "displayName": "status",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true
-            },
-            {
-              "id": "ticket_id",
-              "displayName": "ticket_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "sla_target",
-              "displayName": "sla_target",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "assigned_queue",
-              "displayName": "assigned_queue",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            },
-            {
-              "id": "escalation_required",
-              "displayName": "escalation_required",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "type": "string",
-              "canBeUsedToMatch": true,
-              "removed": false
-            }
-          ],
+          "schema": [],
           "attemptToConvertTypes": false,
           "convertFieldsToString": false
         },
@@ -284,122 +97,62 @@
       },
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.7,
-      "position": [
-        96,
-        -128
-      ],
-      "id": "d1e07b14-9ff2-4077-9853-9f628176574f",
-      "name": "Append row in sheet",
-      "credentials": {
-        "googleSheetsOAuth2Api": {
-          "id": "K2reRD4pbaOfzKMH",
-          "name": "Google Sheets OAuth2 API"
-        }
-      }
+      "position": [96, -128],
+      "id": "google-sheets-template",
+      "name": "Append row in sheet"
     },
     {
       "parameters": {
-        "sendTo": "claudio.automation.labs@gmail.com",
+        "sendTo": "analyst@example.com",
         "subject": "=[{{ $('Code in JavaScript').first().json.priority }}] {{ $('Code in JavaScript').first().json.ticket_title }}",
-        "message": "=<h2>Novo chamado triado pelo AI Rapid Triage Agent</h2>\n\n<p><strong>Ticket ID:</strong> {{ $('Code in JavaScript').first().json.ticket_id || 'N/A' }}</p>\n<p><strong>Título:</strong> {{ $('Code in JavaScript').first().json.ticket_title }}</p>\n<p><strong>Categoria:</strong> {{ $('Code in JavaScript').first().json.category }}</p>\n<p><strong>Prioridade:</strong> {{ $('Code in JavaScript').first().json.priority }}</p>\n<p><strong>Risco de Segurança:</strong> {{ $('Code in JavaScript').first().json.security_risk }}</p>\n<p><strong>SLA:</strong> {{ $('Code in JavaScript').first().json.sla_target || 'N/A' }}</p>\n<p><strong>Fila Responsável:</strong> {{ $('Code in JavaScript').first().json.assigned_queue || 'N/A' }}</p>\n<p><strong>Escalação Necessária:</strong> {{ $('Code in JavaScript').first().json.escalation_required || 'N/A' }}</p>\n<p><strong>Status:</strong> {{ $('Code in JavaScript').first().json.status || 'New' }}</p>\n\n<hr>\n\n<h3>Resumo</h3>\n<p>{{ $('Code in JavaScript').first().json.summary }}</p>\n\n<h3>Impacto no negócio</h3>\n<p>{{ $('Code in JavaScript').first().json.business_impact }}</p>\n\n<h3>Ações recomendadas</h3>\n<p>{{ $('Code in JavaScript').first().json.recommended_actions }}</p>\n\n<h3>Resposta sugerida ao usuário</h3>\n<p>{{ $('Code in JavaScript').first().json.suggested_user_response }}</p>\n\n<h3>Nota técnica interna</h3>\n<p>{{ $('Code in JavaScript').first().json.internal_technical_note }}</p>\n\n<hr>\n\n<h3>Triagem completa</h3>\n<pre>{{ $('Code in JavaScript').first().json.clean_output }}</pre>",
+        "message": "=<h2>Novo chamado triado pelo AI Rapid Triage Agent</h2><p><strong>Ticket ID:</strong> {{ $('Code in JavaScript').first().json.ticket_id }}</p><p><strong>Título:</strong> {{ $('Code in JavaScript').first().json.ticket_title }}</p><p><strong>Categoria:</strong> {{ $('Code in JavaScript').first().json.category }}</p><p><strong>Prioridade:</strong> {{ $('Code in JavaScript').first().json.priority }}</p><p><strong>Risco:</strong> {{ $('Code in JavaScript').first().json.security_risk }}</p><p><strong>SLA:</strong> {{ $('Code in JavaScript').first().json.sla_target }}</p><p><strong>Fila:</strong> {{ $('Code in JavaScript').first().json.assigned_queue }}</p><hr><h3>Resumo</h3><p>{{ $('Code in JavaScript').first().json.summary }}</p><h3>Ações recomendadas</h3><p>{{ $('Code in JavaScript').first().json.recommended_actions }}</p><h3>Resposta sugerida</h3><p>{{ $('Code in JavaScript').first().json.suggested_user_response }}</p>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
-      "position": [
-        304,
-        -128
-      ],
-      "id": "b6c24426-54fa-4560-88d7-5475718b2975",
-      "name": "Send a message",
-      "webhookId": "806f8c49-2ee4-4020-bc37-0aa03fdeb43a",
-      "credentials": {
-        "gmailOAuth2": {
-          "id": "bVukZa0igaWqzQ10",
-          "name": "Gmail OAuth2 API"
-        }
-      }
+      "position": [304, -128],
+      "id": "gmail-template",
+      "name": "Send a message"
+    },
+    {
+      "parameters": {
+        "message": "={{ $('Code in JavaScript').first().json.clean_output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chat",
+      "typeVersion": 1.3,
+      "position": [640, -128],
+      "id": "chat-response-template",
+      "name": "Chat"
     }
   ],
   "pinData": {},
   "connections": {
     "When chat message received": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "AI Agent", "type": "main", "index": 0}]]
     },
     "OpenAI Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
+      "ai_languageModel": [[{"node": "AI Agent", "type": "ai_languageModel", "index": 0}]]
     },
     "AI Agent": {
-      "main": [
-        [
-          {
-            "node": "Code in JavaScript",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Code in JavaScript", "type": "main", "index": 0}]]
     },
     "Code in JavaScript": {
-      "main": [
-        [
-          {
-            "node": "Append row in sheet",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Append row in sheet", "type": "main", "index": 0}]]
     },
     "Append row in sheet": {
-      "main": [
-        [
-          {
-            "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Send a message", "type": "main", "index": 0}]]
     },
     "Send a message": {
-      "main": [
-        [
-          {
-            "node": "Chat",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
+      "main": [[{"node": "Chat", "type": "main", "index": 0}]]
     }
   },
   "active": false,
   "settings": {
-    "executionOrder": "v1",
-    "binaryMode": "separate"
+    "executionOrder": "v1"
   },
-  "versionId": "b0b5d843-58ab-40c5-8764-cac4047db294",
   "meta": {
-    "templateCredsSetupCompleted": true,
-    "instanceId": "7d9dc825a05135749147b86ff12114c2c9a74eeab74481c4f6a14d7d531d43f5"
+    "templateCredsSetupCompleted": false
   },
-  "id": "ntL46eoCMSt7ySUb",
   "tags": []
 }
