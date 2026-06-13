@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="390" viewBox="0 0 1440 390" role="img" aria-labelledby="title desc">
+  <title id="title">AI Rapid Triage Agent</title>
+  <desc id="desc">Fluxo centralizado de triagem de chamados com n8n, inteligência artificial, Google Sheets e Gmail.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07111f"/>
+      <stop offset="0.52" stop-color="#0b1f35"/>
+      <stop offset="1" stop-color="#1d1746"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="0.5" stop-color="#818cf8"/>
+      <stop offset="1" stop-color="#c084fc"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1440" height="390" rx="28" fill="url(#bg)"/>
+
+  <g opacity="0.12" stroke="#7dd3fc" stroke-width="1">
+    <path d="M0 65H1440M0 130H1440M0 195H1440M0 260H1440M0 325H1440"/>
+    <path d="M120 0V390M240 0V390M360 0V390M480 0V390M600 0V390M720 0V390M840 0V390M960 0V390M1080 0V390M1200 0V390M1320 0V390"/>
+  </g>
+
+  <text x="720" y="78" text-anchor="middle" fill="#f8fafc" font-family="Segoe UI, Arial, sans-serif" font-size="42" font-weight="700">AI Rapid Triage Agent</text>
+  <text x="720" y="120" text-anchor="middle" fill="#a8b6c8" font-family="Segoe UI, Arial, sans-serif" font-size="21">Triagem inteligente de chamados com n8n, OpenAI, Google Sheets e Gmail</text>
+
+  <g transform="translate(55 175)" font-family="Segoe UI, Arial, sans-serif">
+    <g>
+      <rect width="190" height="130" rx="18" fill="#0f172a" stroke="#38bdf8" stroke-width="2"/>
+      <circle cx="95" cy="34" r="20" fill="#0c4a6e"/>
+      <path d="M84 27h22v14H84zM89 42l-5 5v-6" fill="none" stroke="#7dd3fc" stroke-width="2.8" stroke-linejoin="round"/>
+      <text x="95" y="78" text-anchor="middle" fill="#f8fafc" font-size="17" font-weight="700">Solicitação</text>
+      <text x="95" y="105" text-anchor="middle" fill="#c3cedb" font-size="14">Mensagem do usuário</text>
+    </g>
+
+    <g transform="translate(228 0)">
+      <rect width="190" height="130" rx="18" fill="#0f172a" stroke="#22d3ee" stroke-width="2"/>
+      <circle cx="95" cy="34" r="20" fill="#164e63"/>
+      <path d="M86 34c0-8 4-13 9-13s9 5 9 13-4 13-9 13-9-5-9-13zM90 30h10M90 38h10" fill="none" stroke="#67e8f9" stroke-width="2.5" stroke-linecap="round"/>
+      <text x="95" y="78" text-anchor="middle" fill="#f8fafc" font-size="17" font-weight="700">AI Agent</text>
+      <text x="95" y="105" text-anchor="middle" fill="#c3cedb" font-size="14">Classifica e resume</text>
+    </g>
+
+    <g transform="translate(456 0)">
+      <rect width="190" height="130" rx="18" fill="#0f172a" stroke="#818cf8" stroke-width="2"/>
+      <circle cx="95" cy="34" r="20" fill="#312e81"/>
+      <path d="M84 26h22M84 34h22M84 42h16" stroke="#a5b4fc" stroke-width="3" stroke-linecap="round"/>
+      <text x="95" y="78" text-anchor="middle" fill="#f8fafc" font-size="17" font-weight="700">JavaScript</text>
+      <text x="95" y="105" text-anchor="middle" fill="#c3cedb" font-size="14">Estrutura os dados</text>
+    </g>
+
+    <g transform="translate(684 0)">
+      <rect width="190" height="130" rx="18" fill="#0f172a" stroke="#a78bfa" stroke-width="2"/>
+      <circle cx="95" cy="34" r="20" fill="#4c1d95"/>
+      <path d="M84 24h22v22H84zM91 24v22M99 24v22M84 31h22M84 39h22" fill="none" stroke="#c4b5fd" stroke-width="2.2"/>
+      <text x="95" y="78" text-anchor="middle" fill="#f8fafc" font-size="17" font-weight="700">Google Sheets</text>
+      <text x="95" y="105" text-anchor="middle" fill="#c3cedb" font-size="14">Registra o chamado</text>
+    </g>
+
+    <g transform="translate(912 0)">
+      <rect width="190" height="130" rx="18" fill="#0f172a" stroke="#c084fc" stroke-width="2"/>
+      <circle cx="95" cy="34" r="20" fill="#581c87"/>
+      <path d="M83 26h24v17H83zM83 27l12 9 12-9" fill="none" stroke="#e9d5ff" stroke-width="2.5" stroke-linejoin="round"/>
+      <text x="95" y="78" text-anchor="middle" fill="#f8fafc" font-size="17" font-weight="700">Gmail</text>
+      <text x="95" y="105" text-anchor="middle" fill="#c3cedb" font-size="14">Envia o resumo</text>
+    </g>
+
+    <g transform="translate(1140 0)">
+      <rect width="190" height="130" rx="18" fill="#0f172a" stroke="#f0abfc" stroke-width="2"/>
+      <circle cx="95" cy="34" r="20" fill="#701a75"/>
+      <path d="M84 27h22v14H84zM101 42l5 5v-6" fill="none" stroke="#f5d0fe" stroke-width="2.8" stroke-linejoin="round"/>
+      <text x="95" y="78" text-anchor="middle" fill="#f8fafc" font-size="17" font-weight="700">Resposta</text>
+      <text x="95" y="105" text-anchor="middle" fill="#c3cedb" font-size="14">Retorno no chat</text>
+    </g>
+
+    <g fill="none" stroke="url(#accent)" stroke-width="4" stroke-linecap="round">
+      <path d="M198 65h18"/><path d="M426 65h18"/><path d="M654 65h18"/><path d="M882 65h18"/><path d="M1110 65h18"/>
+    </g>
+    <g fill="#c4b5fd">
+      <path d="M216 65l-8-6v12z"/><path d="M444 65l-8-6v12z"/><path d="M672 65l-8-6v12z"/><path d="M900 65l-8-6v12z"/><path d="M1128 65l-8-6v12z"/>
+    </g>
+  </g>
+
+  <text x="720" y="350" text-anchor="middle" fill="#7f8da3" font-family="Segoe UI, Arial, sans-serif" font-size="14">Triage • SLA • Routing • Logging • Notification • Human review</text>
+</svg>
